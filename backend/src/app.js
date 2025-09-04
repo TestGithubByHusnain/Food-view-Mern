@@ -9,6 +9,6 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-ap.use('/api/food', foodRoutes);
+app.use('/api/food', foodRoutes);
 
 module.exports= app;

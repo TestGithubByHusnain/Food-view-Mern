@@ -1,23 +1,24 @@
-const mongoose = require ('mongoose');
+const mongoose = require('mongoose');
 
 const foodSchema = new mongoose.Schema({
-name:{
+  name: {
     type: String,
     required: true
-},
-video:{
+  },
+  video: {
     type: String,
-required:true,
-},
-description:{
-    type: String,
-},
-foodPartner:{
-type: mongoose.Schema.Types.ObjectId,
-ref:"foodPartner"
-}
+    required: true
+  },
+  description: {
+    type: String
+  },
+  foodPartner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "foodPartner"
+  }
+});
 
+// ✅ Prevent OverwriteModelError
+const foodModel = mongoose.models.food || mongoose.model('food', foodSchema);
 
-})
-const foodModel = mongoose.model('food', foodSchema);
-module.exports= foodModel;
+module.exports = foodModel;
