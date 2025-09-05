@@ -18,4 +18,13 @@ res.status(201).json({
 })
 }
 
-module.exports = { createFood } 
+async function getFoodItems(req, res) {
+const foodItems = await foodModel.find({})
+res.status(200).json({
+message: 'Food Items fetched Successfully',
+foodItems
+
+})
+}
+
+module.exports = { createFood, getFoodItems } 

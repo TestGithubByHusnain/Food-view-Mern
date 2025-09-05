@@ -1,0 +1,25 @@
+/* Centralized theme variables with light/dark support */
+:root{
+  --bg: #ffffff;
+  --card-bg: #f8f9fb;
+  --text: #0f1720;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --border: #e6e9ef;
+  --radius: 12px;
+  --shadow: 0 6px 18px rgba(16,24,40,0.06);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1220;
+    --card-bg: #071026;
+    --text: #e6eef8;
+    --muted: #9aa8bf;
+    --accent: #60a5fa;
+    --accent-contrast: #06202a;
+    --border: rgba(255,255,255,0.06);
+    --shadow: 0 8px 24px rgba(2,6,23,0.6);
+  }
+}
