@@ -11,21 +11,20 @@ const FoodPartnerRegister = () => {
   const handleSubmit = (e) => { 
     e.preventDefault();
 
-    const businessName = e.target.businessName.value;
-    const contactName = e.target.contactName.value;
-    const phone = e.target.phone.value;
-    const email = e.target.email.value;
-    const password = e.target.password.value;
-    const address = e.target.address.value;
+    const formData = new FormData();
+    formData.append('name', e.target.businessName.value);
+    formData.append('contactName', e.target.contactName.value);
+    formData.append('phone', e.target.phone.value);
+    formData.append('email', e.target.email.value);
+    formData.append('password', e.target.password.value);
+    formData.append('address', e.target.address.value);
 
-    axios.post("http://localhost:3000/api/auth/food-partner/register", {
-      name:businessName,
-      contactName,
-      phone,
-      email,
-      password,
-      address
-    }, { withCredentials: true })
+    const imageInput = e.target.partnerImage;
+    if (imageInput && imageInput.files && imageInput.files[0]) {
+      formData.append('image', imageInput.files[0]);
+    }
+
+    axios.post("http://localhost:3000/api/auth/food-partner/register", formData, { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } })
       .then(response => {
         console.log(response.data);
         navigate("/create-food"); // Redirect to create food page after successful registration
@@ -72,6 +71,11 @@ const FoodPartnerRegister = () => {
             <label htmlFor="address">Address</label>
             <input id="address" name="address" placeholder="123 Market Street" autoComplete="street-address" />
             <p className="small-note">Full address helps customers find you faster.</p>
+          </div>
+          <div className="field-group">
+            <label htmlFor="partnerImage">Business Image</label>
+            <input id="partnerImage" name="partnerImage" type="file" accept="image/*" />
+            <p className="small-note">Upload a business logo or photo (optional).</p>
           </div>
           <button className="auth-submit" type="submit">Create Partner Account</button>
         </form>

@@ -1,70 +1,91 @@
-import React, { useState, useEffect } from 'react'
-import '../../styles/profile.css'
-import { useParams } from 'react-router-dom'
-import axios from 'axios'
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import "../../styles/profile.css";
 
 const Profile = () => {
-    const { id } = useParams()
-    const [ profile, setProfile ] = useState(null)
-    const [ videos, setVideos ] = useState([])
+  const { id } = useParams();
+  const [profile, setProfile] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        axios.get(`http://localhost:3000/api/food-partner/${id}`, { withCredentials: true })
-            .then(response => {
-                setProfile(response.data.foodPartner)
-                setVideos(response.data.foodPartner.foodItems)
-            })
-    }, [ id ])
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3000/api/food-partner/${id}`, {
+          withCredentials: true,
+        });
+        setProfile(res.data.foodPartner);
+        setVideos(res.data.foodPartner?.foodItems || []);
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+        setError("Something went wrong while fetching the profile.");
+      }
+    };
 
+    fetchProfile();
+  }, [id]);
 
-    return (
-        <main className="profile-page">
-            <section className="profile-header">
-                <div className="profile-meta">
+  if (error) {
+    return <div className="error-msg">{error}</div>;
+  }
 
-                    <img className="profile-avatar" src="https://images.unsplash.com/photo-1754653099086-3bddb9346d37?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D" alt="" />
+  if (!profile) {
+    return <div className="loading-msg">Loading...</div>;
+  }
 
-                    <div className="profile-info">
-                        <h1 className="profile-pill profile-business" title="Business name">
-                            {profile?.name}
-                        </h1>
-                        <p className="profile-pill profile-address" title="Address">
-                            {profile?.address}
-                        </p>
-                    </div>
-                </div>
+  return (
+    <main className="profile-page">
+      {/* Header Section */}
+      <section className="profile-header">
+        <div className="profile-meta">
+          <img
+            className="profile-avatar"
+            src="https://images.unsplash.com/photo-1754653099086-3bddb9346d37?w=500&auto=format&fit=crop&q=60"
+            alt={`${profile.name}'s avatar`}
+          />
 
-                <div className="profile-stats" role="list" aria-label="Stats">
-                    <div className="profile-stat" role="listitem">
-                        <span className="profile-stat-label">total meals</span>
-                        <span className="profile-stat-value">{profile?.totalMeals}</span>
-                    </div>
-                    <div className="profile-stat" role="listitem">
-                        <span className="profile-stat-label">customer served</span>
-                        <span className="profile-stat-value">{profile?.customersServed}</span>
-                    </div>
-                </div>
-            </section>
+          <div className="profile-info">
+            <h1 className="profile-pill profile-business" title="Business name">
+              {profile.name}
+            </h1>
+            <p className="profile-pill profile-address" title="Address">
+              {profile.address}
+            </p>
+          </div>
+        </div>
 
-            <hr className="profile-sep" />
+        <div className="profile-stats" role="list" aria-label="Stats">
+          <div className="profile-stat" role="listitem">
+            <span className="profile-stat-label">Total Meals</span>
+            <span className="profile-stat-value">{profile.totalMeals}</span>
+          </div>
+          <div className="profile-stat" role="listitem">
+            <span className="profile-stat-label">Customers Served</span>
+            <span className="profile-stat-value">{profile.customersServed}</span>
+          </div>
+        </div>
+      </section>
 
-            <section className="profile-grid" aria-label="Videos">
-                {videos.map((v) => (
-                    <div key={v.id} className="profile-grid-item">
-                        {/* Placeholder tile; replace with <video> or <img> as needed */}
+      <hr className="profile-sep" />
 
+      {/* Videos Section */}
+      <section className="profile-grid" aria-label="Uploaded food videos">
+        {videos.map((video) => (
+          <div key={video.id} className="profile-grid-item">
+            <video
+              className="profile-grid-video"
+              src={video.video}
+              controls
+              muted
+              preload="metadata"
+              playsInline
+            />
+          </div>
+        ))}
+      </section>
+    </main>
+  );
+};
 
-                        <video
-                            className="profile-grid-video"
-                            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                            src={v.video} muted ></video>
-
-
-                    </div>
-                ))}
-            </section>
-        </main>
-    )
-}
-
-export default Profile
+export default Profile;

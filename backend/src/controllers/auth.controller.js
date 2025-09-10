@@ -89,48 +89,55 @@ function logoutUser(req, res) {
 
 
 async function registerFoodPartner(req, res) {
+    try {
+        const { name, email, password, phone, address, contactName } = req.body;
 
-    const { name, email, password, phone, address, contactName } = req.body;
+        const isAccountAlreadyExists = await foodPartnerModel.findOne({ email })
+        if (isAccountAlreadyExists) return res.status(400).json({ message: "Food partner account already exists" })
 
-    const isAccountAlreadyExists = await foodPartnerModel.findOne({
-        email
-    })
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (isAccountAlreadyExists) {
-        return res.status(400).json({
-            message: "Food partner account already exists"
-        })
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const foodPartner = await foodPartnerModel.create({
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        address,
-        contactName
-    })
-
-    const token = jwt.sign({
-        id: foodPartner._id,
-    }, process.env.JWT_SECRET)
-
-    res.cookie("token", token)
-
-    res.status(201).json({
-        message: "Food partner registered successfully",
-        foodPartner: {
-            _id: foodPartner._id,
-            email: foodPartner.email,
-            name: foodPartner.name,
-            address: foodPartner.address,
-            contactName: foodPartner.contactName,
-            phone: foodPartner.phone
+        // If an image file is uploaded via multer, upload it to storage and capture URL
+        let imageUrl = undefined
+        if (req.file && req.file.buffer) {
+            const { uploadFile } = require('../services/storage.service')
+            try {
+                const uploadResult = await uploadFile(req.file.buffer, `${Date.now()}-${req.file.originalname}`)
+                imageUrl = uploadResult?.url
+            } catch (err) {
+                console.error('Image upload failed:', err)
+            }
         }
-    })
 
+        const foodPartner = await foodPartnerModel.create({
+            name,
+            email,
+            password: hashedPassword,
+            phone,
+            address,
+            contactName,
+            image: imageUrl
+        })
+
+        const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET)
+        res.cookie("token", token)
+
+        res.status(201).json({
+            message: "Food partner registered successfully",
+            foodPartner: {
+                _id: foodPartner._id,
+                email: foodPartner.email,
+                name: foodPartner.name,
+                address: foodPartner.address,
+                contactName: foodPartner.contactName,
+                phone: foodPartner.phone,
+                image: foodPartner.image
+            }
+        })
+    } catch (err) {
+        console.error('registerFoodPartner error:', err)
+        res.status(500).json({ message: 'Server error' })
+    }
 }
 
 async function loginFoodPartner(req, res) {
